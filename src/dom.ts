@@ -6,22 +6,28 @@ function createDom(document: Document, vdom: VContent): Node | null {
   }
   if (vdom instanceof VNode) {
     const element = document.createElement(vdom.element);
-    if (vdom.attrs) {
-      Object.keys(vdom.attrs).forEach(attr => element.setAttribute(attr, vdom.attrs[attr]));
-    }
+    mountAttributes(element, vdom.attrs);
     if (vdom.children) {
-      vdom.children.forEach(child => mount(element, child));
+      vdom.children.forEach(child => {
+        const node = createDom(document, child);
+        if (node) {
+          element.appendChild(node);
+        }
+      });
     }
     return element;
   }
   return document.createTextNode(`${vdom}`);
 }
 
-function mount(root: Element, vdom: VContent) {
-  const document = root.ownerDocument;
-  const node = createDom(document, vdom);
-  if (node) {
-    root.appendChild(node);
+function mountAttributes(element: Element, attrs: any) {
+  if (attrs) {
+    Object.keys(attrs).forEach(attr => {
+      const value = attrs[attr];
+      if (value) {
+        element.setAttribute(attr, value);
+      }
+    });
   }
 }
 
@@ -31,10 +37,20 @@ function diffChildren(parent: Element, elements: Node[], vnodes: VContent[]): vo
   });
 }
 
+function diffAttributes(element: Element, attrs: any) {
+  const oldAttrs = Array.from(element.attributes).map(a => a.name);
+  oldAttrs.forEach(name => {
+    if (!attrs[name]) {
+      element.removeAttribute(name);
+    }
+  });
+  mountAttributes(element, attrs);
+}
+
 function diff(parent: Element, element: Node | null, vdom: VContent): void {
   if (element instanceof Element && vdom instanceof VNode) {
     if (vdom.element === element.tagName.toLowerCase()) {
-      // TODO diff attributes
+      diffAttributes(element, vdom.attrs);
       diffChildren(element, Array.from(element.childNodes), vdom.children);
       return;
     }

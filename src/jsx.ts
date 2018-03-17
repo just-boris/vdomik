@@ -402,8 +402,7 @@ declare global {
       charSet?: string;
       challenge?: string;
       checked?: boolean;
-      class?: string | { [key: string]: boolean };
-      className?: string | { [key: string]: boolean };
+      class?: string | false;
       cols?: number;
       colSpan?: number;
       content?: string;
