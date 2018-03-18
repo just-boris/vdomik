@@ -1,5 +1,7 @@
 import { VNode, VContent } from "./core/node";
 
+const listenersMap = new WeakMap<Element, { [k: string]: EventListenerObject }>();
+
 function createDom(document: Document, vdom: VContent): Node | null {
   if (!vdom) {
     return null;
@@ -22,8 +24,10 @@ function createDom(document: Document, vdom: VContent): Node | null {
 
 function mountAttributes(element: Element, attrs: any) {
   if (attrs) {
-    Object.keys(attrs).forEach((attr) => {
-      if(attr in element) {
+    Object.keys(attrs).forEach(attr => {
+      if (attr[0] === "o" && attr[1] === "n") {
+        mountListener(element, attr, attrs[attr]);
+      } else if (attr in element) {
         (element as any)[attr] = attrs[attr];
       } else {
         const value = attrs[attr];
@@ -32,6 +36,20 @@ function mountAttributes(element: Element, attrs: any) {
         }
       }
     });
+  }
+}
+
+function mountListener(element: Element, attribute: string, listener: EventListener) {
+  const listeners = listenersMap.get(element) || {};
+  const existing = listeners[attribute];
+  if (existing) {
+    existing.handleEvent = listener;
+  } else {
+    listeners[attribute] = {
+      handleEvent: listener
+    };
+    listenersMap.set(element, listeners);
+    element.addEventListener(attribute.substr(2), listeners[attribute]);
   }
 }
 
@@ -48,6 +66,14 @@ function diffAttributes(element: Element, attrs: any) {
       element.removeAttribute(name);
     }
   });
+  const listeners = listenersMap.get(element);
+  if (listeners) {
+    Object.keys(listeners).forEach(name => {
+      if (!attrs[name]) {
+        element.removeEventListener(name.substr(2), listeners[name]);
+      }
+    });
+  }
   mountAttributes(element, attrs);
 }
 
@@ -59,7 +85,7 @@ function diff(parent: Element, element: Node | null, vdom: VContent): void {
       return;
     }
   }
-  if (element instanceof Text && !(vdom instanceof Node)) {
+  if (element instanceof Text && !(vdom instanceof VNode)) {
     const newValue = `${vdom}`;
     if (element.nodeValue !== newValue) {
       element.nodeValue = newValue;

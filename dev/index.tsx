@@ -12,12 +12,29 @@ const items = ["one", 2];
 let text = "test";
 let randomNumbers = randomize(3);
 
+function onSubmitClick(event: Event) {
+  event.preventDefault();
+  items.push((event.target as HTMLFormElement).querySelector("input")!.value);
+  text = "";
+  app();
+}
+
+function removeItem(index: number) {
+  items.splice(index, 1);
+  app();
+}
+
+function onDiceClick() {
+  randomNumbers = randomize(randomize(1)[0]);
+  app();
+}
+
 function app() {
   render(
     root,
     <div>
       <h2>Todo list</h2>
-      <form>
+      <form onsubmit={onSubmitClick}>
         <p>
           <label>
             Add:
@@ -26,18 +43,35 @@ function app() {
           <button>Add</button>
         </p>
       </form>
-      <ul>
-        {items.map((item, index) => <li class={index === items.length - 1 && "last"}>{item}</li>)}
-      </ul>
+      {items.length > 0 ? (
+        <ul>
+          {items.map((item, index) => (
+            <li class={index === items.length - 1 && "last"}>
+              {item}{" "}
+              <a
+                href="javascript:void(0)"
+                style="text-decoration: none;"
+                onclick={() => removeItem(index)}
+              >
+                &times;
+              </a>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p>
+          <i>Empty list</i>
+        </p>
+      )}
       <h2>Casino</h2>
       <table>
         <tr>
-          <td>
-            <button id="dice">Dice!</button>
-          </td>
           {randomNumbers.map(num => <td>{num}</td>)}
           <td>
             = <b>{randomNumbers.reduce((a, b) => a + b)}</b>
+          </td>
+          <td>
+            <button onclick={onDiceClick}>Dice!</button>
           </td>
         </tr>
       </table>
@@ -46,17 +80,3 @@ function app() {
 }
 
 app();
-
-const form = root.querySelector("form")!;
-
-form.addEventListener("submit", event => {
-  event.preventDefault();
-  items.push(form.querySelector("input")!.value);
-  text = "";
-  app();
-});
-
-root.querySelector("#dice")!.addEventListener("click", () => {
-  randomNumbers = randomize(randomize(1)[0]);
-  app();
-});

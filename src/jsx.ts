@@ -288,99 +288,99 @@ declare global {
 
     interface DOMAttributes {
       // Image Events
-      onLoad?: GenericEventHandler;
+      onload?: GenericEventHandler;
 
       // Clipboard Events
-      onCopy?: ClipboardEventHandler;
-      onCut?: ClipboardEventHandler;
-      onPaste?: ClipboardEventHandler;
+      oncopy?: ClipboardEventHandler;
+      oncut?: ClipboardEventHandler;
+      onpaste?: ClipboardEventHandler;
 
       // Composition Events
-      onCompositionEnd?: CompositionEventHandler;
-      onCompositionStart?: CompositionEventHandler;
-      onCompositionUpdate?: CompositionEventHandler;
+      oncompositionEnd?: CompositionEventHandler;
+      oncompositionStart?: CompositionEventHandler;
+      oncompositionUpdate?: CompositionEventHandler;
 
       // Focus Events
-      onFocus?: FocusEventHandler;
-      onBlur?: FocusEventHandler;
+      onfocus?: FocusEventHandler;
+      onblur?: FocusEventHandler;
 
       // Form Events
-      onChange?: GenericEventHandler;
-      onInput?: GenericEventHandler;
-      onSearch?: GenericEventHandler;
-      onSubmit?: GenericEventHandler;
+      onchange?: GenericEventHandler;
+      oninput?: GenericEventHandler;
+      onsearch?: GenericEventHandler;
+      onsubmit?: GenericEventHandler;
 
       // Keyboard Events
-      onKeyDown?: KeyboardEventHandler;
-      onKeyPress?: KeyboardEventHandler;
-      onKeyUp?: KeyboardEventHandler;
+      onkeydown?: KeyboardEventHandler;
+      onkeypress?: KeyboardEventHandler;
+      onkeyup?: KeyboardEventHandler;
 
       // Media Events
-      onAbort?: GenericEventHandler;
-      onCanPlay?: GenericEventHandler;
-      onCanPlayThrough?: GenericEventHandler;
-      onDurationChange?: GenericEventHandler;
-      onEmptied?: GenericEventHandler;
-      onEncrypted?: GenericEventHandler;
-      onEnded?: GenericEventHandler;
-      onLoadedData?: GenericEventHandler;
-      onLoadedMetadata?: GenericEventHandler;
-      onLoadStart?: GenericEventHandler;
-      onPause?: GenericEventHandler;
-      onPlay?: GenericEventHandler;
-      onPlaying?: GenericEventHandler;
-      onProgress?: GenericEventHandler;
-      onRateChange?: GenericEventHandler;
-      onSeeked?: GenericEventHandler;
-      onSeeking?: GenericEventHandler;
-      onStalled?: GenericEventHandler;
-      onSuspend?: GenericEventHandler;
-      onTimeUpdate?: GenericEventHandler;
-      onVolumeChange?: GenericEventHandler;
-      onWaiting?: GenericEventHandler;
+      onabort?: GenericEventHandler;
+      oncanplay?: GenericEventHandler;
+      oncanplaythrough?: GenericEventHandler;
+      ondurationchange?: GenericEventHandler;
+      onemptied?: GenericEventHandler;
+      onencrypted?: GenericEventHandler;
+      onended?: GenericEventHandler;
+      onloadeddata?: GenericEventHandler;
+      onloadedmetadata?: GenericEventHandler;
+      onloadStart?: GenericEventHandler;
+      onpause?: GenericEventHandler;
+      onplay?: GenericEventHandler;
+      onplaying?: GenericEventHandler;
+      onprogress?: GenericEventHandler;
+      onratechange?: GenericEventHandler;
+      onseeked?: GenericEventHandler;
+      onseeking?: GenericEventHandler;
+      onstalled?: GenericEventHandler;
+      onsuspend?: GenericEventHandler;
+      ontimeupdate?: GenericEventHandler;
+      onvolumechange?: GenericEventHandler;
+      onwaiting?: GenericEventHandler;
 
       // MouseEvents
-      onClick?: MouseEventHandler;
-      onContextMenu?: MouseEventHandler;
-      onDblClick?: MouseEventHandler;
-      onDrag?: DragEventHandler;
-      onDragEnd?: DragEventHandler;
-      onDragEnter?: DragEventHandler;
-      onDragExit?: DragEventHandler;
-      onDragLeave?: DragEventHandler;
-      onDragOver?: DragEventHandler;
-      onDragStart?: DragEventHandler;
-      onDrop?: DragEventHandler;
-      onMouseDown?: MouseEventHandler;
-      onMouseEnter?: MouseEventHandler;
-      onMouseLeave?: MouseEventHandler;
-      onMouseMove?: MouseEventHandler;
-      onMouseOut?: MouseEventHandler;
-      onMouseOver?: MouseEventHandler;
-      onMouseUp?: MouseEventHandler;
+      onclick?: MouseEventHandler;
+      oncontextMenu?: MouseEventHandler;
+      ondblclick?: MouseEventHandler;
+      ondrag?: DragEventHandler;
+      ondragend?: DragEventHandler;
+      ondragenter?: DragEventHandler;
+      ondragexit?: DragEventHandler;
+      ondragleave?: DragEventHandler;
+      ondragover?: DragEventHandler;
+      ondragstart?: DragEventHandler;
+      ondrop?: DragEventHandler;
+      onmousedown?: MouseEventHandler;
+      onmouseenter?: MouseEventHandler;
+      onmouseleave?: MouseEventHandler;
+      onmousemove?: MouseEventHandler;
+      onmouseout?: MouseEventHandler;
+      onmouseover?: MouseEventHandler;
+      onmouseup?: MouseEventHandler;
 
       // Selection Events
-      onSelect?: GenericEventHandler;
+      onselect?: GenericEventHandler;
 
       // Touch Events
-      onTouchCancel?: TouchEventHandler;
-      onTouchEnd?: TouchEventHandler;
-      onTouchMove?: TouchEventHandler;
-      onTouchStart?: TouchEventHandler;
+      ontouchcancel?: TouchEventHandler;
+      ontouchend?: TouchEventHandler;
+      ontouchmove?: TouchEventHandler;
+      ontouchstart?: TouchEventHandler;
 
       // UI Events
-      onScroll?: UIEventHandler;
+      onscroll?: UIEventHandler;
 
       // Wheel Events
-      onWheel?: WheelEventHandler;
+      onwheel?: WheelEventHandler;
 
       // Animation Events
-      onAnimationStart?: AnimationEventHandler;
-      onAnimationEnd?: AnimationEventHandler;
-      onAnimationIteration?: AnimationEventHandler;
+      onanimationstart?: AnimationEventHandler;
+      onanimationend?: AnimationEventHandler;
+      onanimationiteration?: AnimationEventHandler;
 
       // Transition Events
-      onTransitionEnd?: TransitionEventHandler;
+      ontransitionend?: TransitionEventHandler;
     }
 
     interface HTMLAttributes extends DOMAttributes {
