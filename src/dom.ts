@@ -22,10 +22,14 @@ function createDom(document: Document, vdom: VContent): Node | null {
 
 function mountAttributes(element: Element, attrs: any) {
   if (attrs) {
-    Object.keys(attrs).forEach(attr => {
-      const value = attrs[attr];
-      if (value) {
-        element.setAttribute(attr, value);
+    Object.keys(attrs).forEach((attr) => {
+      if(attr in element) {
+        (element as any)[attr] = attrs[attr];
+      } else {
+        const value = attrs[attr];
+        if (value) {
+          element.setAttribute(attr, value);
+        }
       }
     });
   }
