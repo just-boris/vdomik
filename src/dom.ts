@@ -62,14 +62,14 @@ function diffChildren(parent: Element, elements: Node[], vnodes: VContent[]): vo
 function diffAttributes(element: Element, attrs: any) {
   const oldAttrs = Array.from(element.attributes).map(a => a.name);
   oldAttrs.forEach(name => {
-    if (!attrs[name]) {
+    if (!attrs || !attrs[name]) {
       element.removeAttribute(name);
     }
   });
   const listeners = listenersMap.get(element);
   if (listeners) {
     Object.keys(listeners).forEach(name => {
-      if (!attrs[name]) {
+      if (!attrs || !attrs[name]) {
         element.removeEventListener(name.substr(2), listeners[name]);
       }
     });
