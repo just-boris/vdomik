@@ -5,11 +5,13 @@ import render from "../src/dom";
 
 describe("Dom rendering", () => {
   let cleanupJsdom: () => void;
+  let element: Element;
   before(() => (cleanupJsdom = jsdom()));
   after(() => cleanupJsdom());
 
+  beforeEach(() => (element = document.createElement("div")));
+
   it("should render dom-elements", () => {
-    const element = document.createElement("div");
     render(
       element,
       <div>
@@ -27,8 +29,51 @@ describe("Dom rendering", () => {
     expect(element.querySelector("#element p")!.textContent).toBe("paragraph");
   });
 
+  it("should append new elements", () => {
+    render(
+      element,
+      <div>
+        <div id="first">1</div>
+      </div>
+    );
+
+    const first = element.querySelector("#first");
+
+    render(
+      element,
+      <div>
+        <div id="first">1</div>
+        <div id="second">2</div>
+      </div>
+    );
+
+    expect(element.querySelector("#first")).toBe(first);
+    expect(element.querySelector("#second")).toExist();
+  });
+
+  it("should remove elements", () => {
+    render(
+      element,
+      <div>
+        <div id="first">1</div>
+        <div id="second">2</div>
+      </div>
+    );
+
+    const first = element.querySelector("#first");
+
+    render(
+      element,
+      <div>
+        <div id="first">1</div>
+      </div>
+    );
+
+    expect(element.querySelector("#first")).toBe(first);
+    expect(element.querySelector("#second")).toNotExist();
+  });
+
   it("should replace only updated elements", () => {
-    const element = document.createElement("div");
     render(
       element,
       <div>
@@ -53,16 +98,14 @@ describe("Dom rendering", () => {
   });
 
   it("should use properties instead of attributes when possible", () => {
-    const element = document.createElement("div");
     render(element, <input value="test" data-value="attribute" />);
     const input = element.querySelector("input")!;
-    expect(input.getAttribute('value')).toBeFalsy();
+    expect(input.getAttribute("value")).toBeFalsy();
     expect(input.value).toBe("test");
     expect(input.getAttribute("data-value")).toBe("attribute");
   });
 
   it("should attach and detach event listeners", () => {
-    const element = document.createElement("div");
     const clickSpy = expect.createSpy();
     render(element, <button onclick={clickSpy}>Click me!</button>);
 
