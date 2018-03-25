@@ -1,4 +1,4 @@
-import { VNode } from "./core/node";
+import { VNode, LifecycleListener } from "./core/node";
 
 declare global {
   namespace JSX {
@@ -9,6 +9,11 @@ declare global {
     //   interface ElementAttributesProperty {
     //     props: any;
     //   }
+
+    interface IntrinsicAttributes {
+      oncreate?: LifecycleListener;
+      onremove?: LifecycleListener;
+    }
 
     interface SVGAttributes extends HTMLAttributes {
       accentHeight?: number | string;
@@ -383,7 +388,7 @@ declare global {
       ontransitionend?: TransitionEventHandler;
     }
 
-    interface HTMLAttributes extends DOMAttributes {
+    interface HTMLAttributes extends DOMAttributes, IntrinsicAttributes {
       // Standard HTML Attributes
       accept?: string;
       acceptCharset?: string;

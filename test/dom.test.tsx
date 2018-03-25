@@ -118,4 +118,67 @@ describe("Dom rendering", () => {
     element.querySelector("button")!.dispatchEvent(new MouseEvent("click", {}));
     expect(clickSpy).toNotHaveBeenCalled();
   });
+
+  it("should invoke lifecycle hooks", () => {
+    const onCreate = expect.createSpy();
+    const onRemove = expect.createSpy();
+
+    render(
+      element,
+      <div>
+        <div oncreate={onCreate} onremove={onRemove} />
+      </div>
+    );
+
+    expect(onCreate).toHaveBeenCalled();
+    expect(onRemove).toNotHaveBeenCalled();
+
+    onCreate.reset();
+    onRemove.restore();
+    render(element, null);
+
+    expect(onCreate).toNotHaveBeenCalled();
+    expect(onRemove).toHaveBeenCalled();
+  });
+
+  it("should call parent hooks first on create", () => {
+    let parentCalled = false;
+    const onCreateParent = expect.createSpy().andCall(() => (parentCalled = true));
+    const onCreateChild = expect.createSpy().andCall(() => {
+      if (!parentCalled) {
+        throw new Error("Parent must be called before children");
+      }
+    });
+    render(
+      element,
+      <div oncreate={onCreateParent}>
+        <div oncreate={onCreateChild} />
+        <div oncreate={onCreateChild} />
+      </div>
+    );
+
+    expect(onCreateParent.calls.length).toBe(1);
+    expect(onCreateChild.calls.length).toBe(2);
+  });
+
+  it("should call parent hooks last on remove", () => {
+    let parentCalled = false;
+    const onRemoveParent = expect.createSpy().andCall(() => (parentCalled = true));
+    const onRemoveChild = expect.createSpy().andCall(() => {
+      if (parentCalled) {
+        throw new Error("Parent must be called after children");
+      }
+    });
+    render(
+      element,
+      <div onremove={onRemoveParent}>
+        <div onremove={onRemoveChild} />
+        <div onremove={onRemoveChild} />
+      </div>
+    );
+    render(element, null);
+
+    expect(onRemoveParent.calls.length).toBe(1);
+    expect(onRemoveChild.calls.length).toBe(2);
+  });
 });

@@ -1,17 +1,36 @@
-import { VNode, VContent } from "./core/node";
+import { VNode, VContent, VAttrs, LifecycleListener } from "./core/node";
 
-const listenersMap = new WeakMap<Element, { [k: string]: EventListenerObject }>();
+class ElementData {
+  listeners: { [k: string]: EventListenerObject };
+  onremove: LifecycleListener;
 
-function createDom(document: Document, vdom: VContent): Node | null {
+  constructor() {
+    this.listeners = {};
+  }
+}
+
+const elementsDataMap = new WeakMap<Element, ElementData>();
+
+function getElementData(element: Element) {
+  let data = elementsDataMap.get(element);
+  if (!data) {
+    data = new ElementData();
+    elementsDataMap.set(element, data);
+  }
+  return data;
+}
+
+function createDom(document: Document, vdom: VContent | null, callbacks: Function[]): Node | null {
   if (!vdom) {
     return null;
   }
   if (vdom instanceof VNode) {
     const element = document.createElement(vdom.element);
     mountAttributes(element, vdom.attrs);
+    mountHooks(element, vdom.attrs, callbacks);
     if (vdom.children) {
       vdom.children.forEach(child => {
-        const node = createDom(document, child);
+        const node = createDom(document, child, callbacks);
         if (node) {
           element.appendChild(node);
         }
@@ -20,6 +39,20 @@ function createDom(document: Document, vdom: VContent): Node | null {
     return element;
   }
   return document.createTextNode(`${vdom}`);
+}
+
+function mountHooks(element: Element, attrs: VAttrs | null, callbacks: Function[]) {
+  if (!attrs) {
+    return;
+  }
+  const { oncreate, onremove } = attrs;
+  if (oncreate) {
+    callbacks.push(() => oncreate(element));
+  }
+  if (onremove) {
+    const data = getElementData(element);
+    data.onremove = () => onremove(element);
+  }
 }
 
 function mountAttributes(element: Element, attrs: any) {
@@ -40,22 +73,26 @@ function mountAttributes(element: Element, attrs: any) {
 }
 
 function mountListener(element: Element, attribute: string, listener: EventListener) {
-  const listeners = listenersMap.get(element) || {};
-  const existing = listeners[attribute];
+  let data = getElementData(element);
+  const existing = data.listeners[attribute];
   if (existing) {
     existing.handleEvent = listener;
   } else {
-    listeners[attribute] = {
+    data.listeners[attribute] = {
       handleEvent: listener
     };
-    listenersMap.set(element, listeners);
-    element.addEventListener(attribute.substr(2), listeners[attribute]);
+    element.addEventListener(attribute.substr(2), data.listeners[attribute]);
   }
 }
 
-function diffChildren(parent: Element, elements: Node[], vnodes: VContent[]): void {
+function diffChildren(
+  parent: Element,
+  elements: Node[],
+  vnodes: VContent[],
+  callbacks: Function[]
+): void {
   Array.from({ length: Math.max(elements.length, vnodes.length) }).forEach((_, i) => {
-    diff(parent, elements[i], vnodes[i]);
+    diff(parent, elements[i], vnodes[i], callbacks);
   });
 }
 
@@ -66,22 +103,27 @@ function diffAttributes(element: Element, attrs: any) {
       element.removeAttribute(name);
     }
   });
-  const listeners = listenersMap.get(element);
-  if (listeners) {
-    Object.keys(listeners).forEach(name => {
+  const data = elementsDataMap.get(element);
+  if (data && data.listeners) {
+    Object.keys(data.listeners).forEach(name => {
       if (!attrs || !attrs[name]) {
-        element.removeEventListener(name.substr(2), listeners[name]);
+        element.removeEventListener(name.substr(2), data.listeners[name]);
       }
     });
   }
   mountAttributes(element, attrs);
 }
 
-function diff(parent: Element, element: Node | null, vdom: VContent): void {
+function diff(
+  parent: Element,
+  element: Node | null,
+  vdom: VContent | null,
+  callbacks: Function[]
+): void {
   if (element instanceof Element && vdom instanceof VNode) {
     if (vdom.element === element.tagName.toLowerCase()) {
       diffAttributes(element, vdom.attrs);
-      diffChildren(element, Array.from(element.childNodes), vdom.children);
+      diffChildren(element, Array.from(element.childNodes), vdom.children, callbacks);
       return;
     }
   }
@@ -92,7 +134,7 @@ function diff(parent: Element, element: Node | null, vdom: VContent): void {
     }
     return;
   }
-  const newElement = createDom(parent.ownerDocument, vdom);
+  const newElement = createDom(parent.ownerDocument, vdom, callbacks);
   if (newElement) {
     if (element) {
       parent.insertBefore(newElement, element);
@@ -101,10 +143,24 @@ function diff(parent: Element, element: Node | null, vdom: VContent): void {
     }
   }
   if (element) {
+    if (element instanceof Element) {
+      unmountElement(element, callbacks);
+    }
     element.parentNode!.removeChild(element);
   }
 }
 
-export default function render(root: Element, vdom: VContent) {
-  diff(root, root.firstChild, vdom);
+function unmountElement(element: Element, callbacks: Function[]) {
+  Array.from(element.children).forEach(element => unmountElement(element, callbacks));
+  const data = elementsDataMap.get(element);
+  if (data && data.onremove) {
+    const { onremove } = data;
+    callbacks.push(() => onremove(element));
+  }
+}
+
+export default function render(root: Element, vdom: VContent | null) {
+  const callbacks: Function[] = [];
+  diff(root, root.firstChild, vdom, callbacks);
+  callbacks.forEach(cb => cb());
 }
