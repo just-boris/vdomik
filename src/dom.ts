@@ -20,7 +20,7 @@ function getElementData(element: Element) {
   return data;
 }
 
-function createDom(document: Document, vdom: VContent | null, callbacks: Function[]): Node | null {
+function createDom(document: Document, vdom: VContent, callbacks: Function[]): Node | null {
   if (!vdom) {
     return null;
   }
@@ -114,12 +114,7 @@ function diffAttributes(element: Element, attrs: any) {
   mountAttributes(element, attrs);
 }
 
-function diff(
-  parent: Element,
-  element: Node | null,
-  vdom: VContent | null,
-  callbacks: Function[]
-): void {
+function diff(parent: Element, element: Node | null, vdom: VContent, callbacks: Function[]): void {
   if (element instanceof Element && vdom instanceof VNode) {
     if (vdom.element === element.tagName.toLowerCase()) {
       diffAttributes(element, vdom.attrs);
@@ -159,7 +154,7 @@ function unmountElement(element: Element, callbacks: Function[]) {
   }
 }
 
-export default function render(root: Element, vdom: VContent | null) {
+export default function render(root: Element, vdom: VContent) {
   const callbacks: Function[] = [];
   diff(root, root.firstChild, vdom, callbacks);
   callbacks.forEach(cb => cb());

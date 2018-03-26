@@ -1,6 +1,6 @@
 export type VAttrs = JSX.HTMLAttributes & JSX.SVGAttributes;
 
-export type VContent = VNode<VAttrs> | string | number;
+export type VContent = VNode<VAttrs> | string | number | null;
 
 export interface LifecycleListener {
   (element: Element): void
