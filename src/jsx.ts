@@ -13,6 +13,7 @@ declare global {
     interface IntrinsicAttributes {
       oncreate?: LifecycleListener;
       onremove?: LifecycleListener;
+      onupdate?: LifecycleListener;
     }
 
     interface SVGAttributes extends HTMLAttributes {

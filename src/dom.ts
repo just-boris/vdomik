@@ -11,6 +11,8 @@ class ElementData {
 
 const elementsDataMap = new WeakMap<Element, ElementData>();
 
+const some = (...array: boolean[]) => array.some(el => el);
+
 function getElementData(element: Element) {
   let data = elementsDataMap.get(element);
   if (!data) {
@@ -21,7 +23,7 @@ function getElementData(element: Element) {
 }
 
 function createDom(document: Document, vdom: VContent, callbacks: Function[]): Node | null {
-  if (!vdom) {
+  if (vdom === null || vdom === undefined) {
     return null;
   }
   if (vdom instanceof VNode) {
@@ -55,21 +57,31 @@ function mountHooks(element: Element, attrs: VAttrs | null, callbacks: Function[
   }
 }
 
-function mountAttributes(element: Element, attrs: any) {
-  if (attrs) {
-    Object.keys(attrs).forEach(attr => {
+function mountAttributes(element: Element, attrs: any): boolean {
+  if (!attrs) {
+    return false;
+  }
+  return some(
+    ...Object.keys(attrs).map(attr => {
       if (attr[0] === "o" && attr[1] === "n") {
         mountListener(element, attr, attrs[attr]);
+        return false;
       } else if (attr in element) {
-        (element as any)[attr] = attrs[attr];
+        const aElement: any = element;
+        if (aElement[attr] !== attrs[attr]) {
+          aElement[attr] = attrs[attr];
+          return true;
+        }
       } else {
         const value = attrs[attr];
-        if (value) {
+        if (value !== element.getAttribute(attr)) {
           element.setAttribute(attr, value);
+          return true;
         }
       }
-    });
-  }
+      return false;
+    })
+  );
 }
 
 function mountListener(element: Element, attribute: string, listener: EventListener) {
@@ -90,19 +102,25 @@ function diffChildren(
   elements: Node[],
   vnodes: VContent[],
   callbacks: Function[]
-): void {
-  Array.from({ length: Math.max(elements.length, vnodes.length) }).forEach((_, i) => {
-    diff(parent, elements[i], vnodes[i], callbacks);
-  });
+): boolean {
+  return some(
+    ...Array.from({ length: Math.max(elements.length, vnodes.length) }).map((_, i) => {
+      return diff(parent, elements[i], vnodes[i], callbacks);
+    })
+  );
 }
 
-function diffAttributes(element: Element, attrs: any) {
+function diffAttributes(element: Element, attrs: any): boolean {
   const oldAttrs = Array.from(element.attributes).map(a => a.name);
-  oldAttrs.forEach(name => {
-    if (!attrs || !attrs[name]) {
+  let changed = some(
+    ...oldAttrs.map(name => {
+      if (attrs && attrs[name]) {
+        return false;
+      }
       element.removeAttribute(name);
-    }
-  });
+      return true;
+    })
+  );
   const data = elementsDataMap.get(element);
   if (data && data.listeners) {
     Object.keys(data.listeners).forEach(name => {
@@ -111,23 +129,35 @@ function diffAttributes(element: Element, attrs: any) {
       }
     });
   }
-  mountAttributes(element, attrs);
+  return mountAttributes(element, attrs) || changed;
 }
 
-function diff(parent: Element, element: Node | null, vdom: VContent, callbacks: Function[]): void {
+function diff(
+  parent: Element,
+  element: Node | null,
+  vdom: VContent,
+  callbacks: Function[]
+): boolean {
   if (element instanceof Element && vdom instanceof VNode) {
     if (vdom.element === element.tagName.toLowerCase()) {
-      diffAttributes(element, vdom.attrs);
-      diffChildren(element, Array.from(element.childNodes), vdom.children, callbacks);
-      return;
+      const changed = some(
+        diffAttributes(element, vdom.attrs),
+        diffChildren(element, Array.from(element.childNodes), vdom.children, callbacks)
+      );
+      if (changed && vdom.attrs && vdom.attrs.onupdate) {
+        const { onupdate } = vdom.attrs;
+        callbacks.push(() => onupdate(element));
+      }
+      return changed;
     }
   }
   if (element instanceof Text && !(vdom instanceof VNode)) {
     const newValue = `${vdom}`;
     if (element.nodeValue !== newValue) {
       element.nodeValue = newValue;
+      return true;
     }
-    return;
+    return false;
   }
   const newElement = createDom(parent.ownerDocument, vdom, callbacks);
   if (newElement) {
@@ -143,6 +173,7 @@ function diff(parent: Element, element: Node | null, vdom: VContent, callbacks: 
     }
     element.parentNode!.removeChild(element);
   }
+  return true;
 }
 
 function unmountElement(element: Element, callbacks: Function[]) {

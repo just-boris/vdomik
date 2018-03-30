@@ -181,4 +181,29 @@ describe("Dom rendering", () => {
     expect(onRemoveParent.calls.length).toBe(1);
     expect(onRemoveChild.calls.length).toBe(2);
   });
+
+  it("should call update hooks on changed elements", () => {
+    let parentCalled = false;
+    const onUpdateParent = expect.createSpy().andCall(() => (parentCalled = true));
+    const onUpdateFirst = expect.createSpy().andCall(() => {
+      if (parentCalled) {
+        throw new Error("Parent must be called after children");
+      }
+    });
+    const onUpdateSecond = expect.createSpy();
+    render(
+      element,
+      <div>
+        <div>first</div>
+        <div>second</div>
+      </div>
+    );
+    render(
+      element,
+      <div onupdate={onUpdateParent}>
+        <div onupdate={onUpdateFirst}>first</div>
+        <div onupdate={onUpdateSecond}>second</div>
+      </div>
+    );
+  });
 });
