@@ -1,5 +1,4 @@
-import h, { VContent } from "../src";
-import render from "../src/dom";
+import h, { VContent, render } from "../src";
 
 const components = new WeakMap<Element, Component>();
 

@@ -8,7 +8,8 @@
   },
   "scripts": {
     "test": "mocha --require ts-node/register/type-check test/*.test.tsx",
-    "start": "webpack-serve"
+    "start": "WEBPACK_MODE=development webpack-serve",
+    "build": "WEBPACK_MODE=production webpack"
   },
   "keywords": [],
   "author": "",
@@ -25,6 +26,7 @@
     "ts-node": "^5.0.1",
     "typescript": "^2.7.2",
     "webpack": "^4.1.1",
+    "webpack-cli": "^2.0.13",
     "webpack-serve": "^0.2.0"
   }
 }

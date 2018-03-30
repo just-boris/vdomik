@@ -1,6 +1,5 @@
 {
     "compilerOptions": {
-        "outDir": "build/javascript-compiled",
         "module": "commonjs",
         "target": "es5",
         "lib": [
@@ -19,6 +18,6 @@
         "strictNullChecks": true
     },
     "exclude": [
-        "build/**"
+        "dist/**"
     ]
 }

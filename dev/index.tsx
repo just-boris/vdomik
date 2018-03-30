@@ -1,4 +1,4 @@
-import render from "../src/dom";
+import { render } from "../src";
 import { createComponent } from "./component";
 import App from "./app";
 
