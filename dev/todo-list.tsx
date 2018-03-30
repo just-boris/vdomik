@@ -1,14 +1,16 @@
 import h from "../src";
 import Component from "./component";
 
-export default class TodoList extends Component {
-  state: {
-    items: any[];
-    text: string;
-  };
+export interface TodoListProps {
+  items: any[];
+  text: string;
+}
 
-  constructor(items: any[], text: string) {
-    super();
+export default class TodoList extends Component<TodoListProps> {
+  state: TodoListProps;
+
+  constructor(element: Element, {items, text}: TodoListProps) {
+    super(element);
     this.state = {
       items,
       text

@@ -1,8 +1,9 @@
 import h from "../src";
-import Component from "./component";
-import TodoList from "./todo-list";
+import Component, { createComponent } from "./component";
+import TodoList, { TodoListProps } from "./todo-list";
 import Casino from "./casino";
 import HooksDemo from "./hooks-demo";
+import HeightTracker from "./height-tracker";
 
 export default class App extends Component {
     state = {
@@ -11,10 +12,13 @@ export default class App extends Component {
     };
 
     content() {
+      const {items, text} = this.state;
       return <div>
-        {new TodoList(this.state.items, this.state.text).render()}
-        {new Casino().render()}
-        {new HooksDemo().render()}
+        {createComponent(TodoList, {items, text})}
+        {createComponent(Casino)}
+        {createComponent(HooksDemo)}
+        {createComponent(HeightTracker)}
+        <button onclick={() => this.update()}>Rerender</button>
       </div>;
     }
   }
