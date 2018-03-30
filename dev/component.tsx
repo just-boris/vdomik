@@ -1,6 +1,8 @@
 import h, { VContent, render } from "../src";
 
-const components = new WeakMap<Element, Component>();
+interface ComponentElement extends Element {
+  __componentData: Component;
+}
 
 function getTagName(name: string): string {
   const processed = name
@@ -23,24 +25,21 @@ export default abstract class Component<P = {}> {
   abstract content(): VContent;
 }
 
-export function createComponent<C extends Component<T>, T>(
-  Contructor: new (e: Element, p?: T) => C,
-  props?: T
-) {
-  return h(getTagName(Contructor.name), {
+export function createComponent<C extends Component<T>, T>(Contructor: new (e: Element, p?: T) => C, props?: T) {
+  return h(getTagName((Contructor as any).name), {
     oncreate: (element: Element) => {
       const component = new Contructor(element, props);
-      components.set(element, component);
+      (element as ComponentElement).__componentData = component;
       component.update();
     },
     onupdate: (element: Element) => {
-      const component = components.get(element);
+      const component = (element as ComponentElement).__componentData;
       if (component) {
         component.update();
       }
     },
     onremove: (element: Element) => {
-      const component = components.get(element);
+      const component = (element as ComponentElement).__componentData;
       if (component) {
         component.remove();
       }

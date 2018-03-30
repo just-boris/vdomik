@@ -1,23 +1,18 @@
 {
-    "compilerOptions": {
-        "module": "commonjs",
-        "target": "es5",
-        "lib": [
-            "es6",
-            "dom"
-        ],
-        "sourceMap": true,
-        "allowJs": true,
-        "jsx": "react",
-        "jsxFactory": "h",
-        "moduleResolution": "node",
-        "rootDir": ".",
-        "noImplicitReturns": true,
-        "noImplicitThis": true,
-        "noImplicitAny": true,
-        "strictNullChecks": true
-    },
-    "exclude": [
-        "dist/**"
-    ]
+  "compilerOptions": {
+    "module": "commonjs",
+    "target": "es5",
+    "lib": ["dom", "es5"],
+    "sourceMap": true,
+    "allowJs": true,
+    "jsx": "react",
+    "jsxFactory": "h",
+    "moduleResolution": "node",
+    "rootDir": ".",
+    "noImplicitReturns": true,
+    "noImplicitThis": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true
+  },
+  "exclude": ["dist/**"]
 }

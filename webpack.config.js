@@ -12,7 +12,7 @@ module.exports = {
   module: {
     rules: [{ test: /\.tsx?$/, loader: "ts-loader" }]
   },
-  plugins: [new HtmlWebpackPlugin({chunks: ['dev']})]
+  plugins: [new HtmlWebpackPlugin({ chunks: ["dev"] })]
 };
 
 if (process.env.WEBPACK_SERVE) {

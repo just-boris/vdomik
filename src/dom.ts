@@ -9,17 +9,31 @@ class ElementData {
   }
 }
 
-const elementsDataMap = new WeakMap<Element, ElementData>();
+interface ElementWithData extends Element {
+  __vdomData: ElementData;
+}
 
 const some = (...array: boolean[]) => array.some(el => el);
+function createArray<T, X>(input: ArrayLike<T>, fn?: (value: T, i: number) => X): X[] {
+  const result = new Array(input.length);
+  if (fn) {
+    for (let i = 0; i < input.length; i++) {
+      result[i] = fn(input[i], i);
+    }
+  } else {
+    for (let i = 0; i < input.length; i++) {
+      result[i] = input[i];
+    }
+  }
+  return result;
+}
 
 function getElementData(element: Element) {
-  let data = elementsDataMap.get(element);
-  if (!data) {
-    data = new ElementData();
-    elementsDataMap.set(element, data);
+  const el = element as ElementWithData;
+  if (!el.__vdomData) {
+    el.__vdomData = new ElementData();
   }
-  return data;
+  return el.__vdomData;
 }
 
 function createDom(document: Document, vdom: VContent, callbacks: Function[]): Node | null {
@@ -97,21 +111,16 @@ function mountListener(element: Element, attribute: string, listener: EventListe
   }
 }
 
-function diffChildren(
-  parent: Element,
-  elements: Node[],
-  vnodes: VContent[],
-  callbacks: Function[]
-): boolean {
+function diffChildren(parent: Element, elements: NodeList, vnodes: VContent[], callbacks: Function[]): boolean {
   return some(
-    ...Array.from({ length: Math.max(elements.length, vnodes.length) }).map((_, i) => {
+    ...createArray({ length: Math.max(elements.length, vnodes.length) }, (_, i) => {
       return diff(parent, elements[i], vnodes[i], callbacks);
     })
   );
 }
 
 function diffAttributes(element: Element, attrs: any): boolean {
-  const oldAttrs = Array.from(element.attributes).map(a => a.name);
+  const oldAttrs = createArray(element.attributes, a => a.name);
   let changed = some(
     ...oldAttrs.map(name => {
       if (attrs && attrs[name]) {
@@ -121,7 +130,7 @@ function diffAttributes(element: Element, attrs: any): boolean {
       return true;
     })
   );
-  const data = elementsDataMap.get(element);
+  const data = (element as ElementWithData).__vdomData;
   if (data && data.listeners) {
     Object.keys(data.listeners).forEach(name => {
       if (!attrs || !attrs[name]) {
@@ -132,17 +141,12 @@ function diffAttributes(element: Element, attrs: any): boolean {
   return mountAttributes(element, attrs) || changed;
 }
 
-function diff(
-  parent: Element,
-  element: Node | null,
-  vdom: VContent,
-  callbacks: Function[]
-): boolean {
+function diff(parent: Element, element: Node | null, vdom: VContent, callbacks: Function[]): boolean {
   if (element instanceof Element && vdom instanceof VNode) {
     if (vdom.element === element.tagName.toLowerCase()) {
       const changed = some(
         diffAttributes(element, vdom.attrs),
-        diffChildren(element, Array.from(element.childNodes), vdom.children, callbacks)
+        diffChildren(element, element.childNodes, vdom.children, callbacks)
       );
       if (changed && vdom.attrs && vdom.attrs.onupdate) {
         const { onupdate } = vdom.attrs;
@@ -177,8 +181,8 @@ function diff(
 }
 
 function unmountElement(element: Element, callbacks: Function[]) {
-  Array.from(element.children).forEach(element => unmountElement(element, callbacks));
-  const data = elementsDataMap.get(element);
+  createArray(element.children, element => unmountElement(element, callbacks));
+  const data = (element as ElementWithData).__vdomData;
   if (data && data.onremove) {
     const { onremove } = data;
     callbacks.push(() => onremove(element));
