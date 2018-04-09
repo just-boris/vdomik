@@ -1,4 +1,5 @@
 import { VNode, VContent, VAttrs, LifecycleListener } from "./core/node";
+import svgTags from "./svg-tags";
 
 class ElementData {
   listeners: { [k: string]: EventListenerObject };
@@ -41,8 +42,11 @@ function createDom(document: Document, vdom: VContent, callbacks: Function[]): N
     return null;
   }
   if (vdom instanceof VNode) {
-    const element = document.createElement(vdom.element);
-    mountAttributes(element, vdom.attrs);
+    const isSvg = svgTags.indexOf(vdom.element) > -1;
+    const element = isSvg
+      ? document.createElementNS("http://www.w3.org/2000/svg", vdom.element)
+      : document.createElement(vdom.element);
+    mountAttributes(element, vdom.attrs, isSvg);
     mountHooks(element, vdom.attrs, callbacks);
     if (vdom.children) {
       vdom.children.forEach(child => {
@@ -71,7 +75,7 @@ function mountHooks(element: Element, attrs: VAttrs | null, callbacks: Function[
   }
 }
 
-function mountAttributes(element: Element, attrs: any): boolean {
+function mountAttributes(element: Element, attrs: any, isSvg: boolean): boolean {
   if (!attrs) {
     return false;
   }
@@ -80,7 +84,7 @@ function mountAttributes(element: Element, attrs: any): boolean {
       if (attr[0] === "o" && attr[1] === "n") {
         mountListener(element, attr, attrs[attr]);
         return false;
-      } else if (attr in element) {
+      } else if (!isSvg && attr in element) {
         const aElement: any = element;
         if (aElement[attr] !== attrs[attr]) {
           aElement[attr] = attrs[attr];
@@ -138,7 +142,8 @@ function diffAttributes(element: Element, attrs: any): boolean {
       }
     });
   }
-  return mountAttributes(element, attrs) || changed;
+  const isSvg = svgTags.indexOf(element.tagName.toLowerCase()) > -1;
+  return mountAttributes(element, attrs, isSvg) || changed;
 }
 
 function diff(parent: Element, element: Node | null, vdom: VContent, callbacks: Function[]): boolean {
