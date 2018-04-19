@@ -115,7 +115,7 @@ function mountListener(element: Element, attribute: string, listener: EventListe
   }
 }
 
-function diffChildren(parent: Element, elements: NodeList, vnodes: VContent[], callbacks: Function[]): boolean {
+function diffChildren(parent: Element, elements: Node[], vnodes: VContent[], callbacks: Function[]): boolean {
   return some(
     ...createArray({ length: Math.max(elements.length, vnodes.length) }, (_, i) => {
       return diff(parent, elements[i], vnodes[i], callbacks);
@@ -151,7 +151,7 @@ function diff(parent: Element, element: Node | null, vdom: VContent, callbacks: 
     if (vdom.element === element.tagName.toLowerCase()) {
       const changed = some(
         diffAttributes(element, vdom.attrs),
-        diffChildren(element, element.childNodes, vdom.children, callbacks)
+        diffChildren(element, Array.prototype.slice.apply(element.childNodes), vdom.children, callbacks)
       );
       if (changed && vdom.attrs && vdom.attrs.onupdate) {
         const { onupdate } = vdom.attrs;

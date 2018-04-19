@@ -6,10 +6,16 @@ import render from "../src/dom";
 describe("Dom rendering", () => {
   let cleanupJsdom: () => void;
   let element: Element;
-  before(() => (cleanupJsdom = jsdom()));
-  after(() => cleanupJsdom());
+  before(() => {
+    cleanupJsdom = jsdom();
+  });
+  after(() => {
+    cleanupJsdom();
+  });
 
-  beforeEach(() => (element = document.createElement("div")));
+  beforeEach(() => {
+    element = document.createElement("div");
+  });
 
   it("should render dom-elements", () => {
     render(
@@ -57,6 +63,7 @@ describe("Dom rendering", () => {
       <div>
         <div id="first">1</div>
         <div id="second">2</div>
+        <div id="third">3</div>
       </div>
     );
 
@@ -71,6 +78,7 @@ describe("Dom rendering", () => {
 
     expect(element.querySelector("#first")).toBe(first);
     expect(element.querySelector("#second")).toNotExist();
+    expect(element.querySelector("#third")).toNotExist();
   });
 
   it("should replace only updated elements", () => {
