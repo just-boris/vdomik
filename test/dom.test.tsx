@@ -113,6 +113,13 @@ describe("Dom rendering", () => {
     expect(input.getAttribute("data-value")).toBe("attribute");
   });
 
+  it("should insert raw html using special property", () => {
+    render(element, <div unsafeInnerHTML={`<div><span id="test"></span></div>`} />);
+    expect(element.querySelector('#test')).toExist();
+    render(element, <div unsafeInnerHTML={`<span id="test2"></span>`} />);
+    expect(element.querySelector('#test2')).toExist();
+  });
+
   it("should attach and detach event listeners", () => {
     const clickSpy = expect.createSpy();
     render(element, <button onclick={clickSpy}>Click me!</button>);

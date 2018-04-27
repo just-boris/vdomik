@@ -11,6 +11,7 @@ declare global {
     //   }
 
     interface IntrinsicAttributes {
+      unsafeInnerHTML?: string;
       oncreate?: LifecycleListener;
       onremove?: LifecycleListener;
       onupdate?: LifecycleListener;

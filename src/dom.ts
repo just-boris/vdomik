@@ -84,6 +84,11 @@ function mountAttributes(element: Element, attrs: any, isSvg: boolean): boolean 
       if (attr[0] === "o" && attr[1] === "n") {
         mountListener(element, attr, attrs[attr]);
         return false;
+      } else if (attr === "unsafeInnerHTML") {
+        if (element.innerHTML !== attrs[attr]) {
+          element.innerHTML = attrs[attr];
+          return true;
+        }
       } else if (!isSvg && attr in element) {
         const aElement: any = element;
         if (aElement[attr] !== attrs[attr]) {
@@ -149,10 +154,11 @@ function diffAttributes(element: Element, attrs: any): boolean {
 function diff(parent: Element, element: Node | null, vdom: VContent, callbacks: Function[]): boolean {
   if (element instanceof Element && vdom instanceof VNode) {
     if (vdom.element === element.tagName.toLowerCase()) {
-      const changed = some(
-        diffAttributes(element, vdom.attrs),
-        diffChildren(element, Array.prototype.slice.apply(element.childNodes), vdom.children, callbacks)
-      );
+      const changedAttrs = diffAttributes(element, vdom.attrs);
+      const changedChildren =
+        (!vdom.attrs || !vdom.attrs.unsafeInnerHTML) &&
+        diffChildren(element, Array.prototype.slice.apply(element.childNodes), vdom.children, callbacks);
+      const changed = changedAttrs || changedChildren;
       if (changed && vdom.attrs && vdom.attrs.onupdate) {
         const { onupdate } = vdom.attrs;
         callbacks.push(() => onupdate(element));
