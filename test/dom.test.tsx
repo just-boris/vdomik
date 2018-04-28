@@ -115,9 +115,14 @@ describe("Dom rendering", () => {
 
   it("should insert raw html using special property", () => {
     render(element, <div unsafeInnerHTML={`<div><span id="test"></span></div>`} />);
-    expect(element.querySelector('#test')).toExist();
+    expect(element.querySelector("#test")).toExist();
     render(element, <div unsafeInnerHTML={`<span id="test2"></span>`} />);
-    expect(element.querySelector('#test2')).toExist();
+    expect(element.querySelector("#test2")).toExist();
+  });
+
+  it("should set the right inline styles", () => {
+    render(element, <div style="padding: 10px" />);
+    expect(element.querySelector("div")!.style.padding).toBe("10px");
   });
 
   it("should attach and detach event listeners", () => {

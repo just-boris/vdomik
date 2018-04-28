@@ -89,7 +89,7 @@ function mountAttributes(element: Element, attrs: any, isSvg: boolean): boolean 
           element.innerHTML = attrs[attr];
           return true;
         }
-      } else if (!isSvg && attr in element) {
+      } else if (!isSvg && attr !== 'style' && attr in element) {
         const aElement: any = element;
         if (aElement[attr] !== attrs[attr]) {
           aElement[attr] = attrs[attr];
