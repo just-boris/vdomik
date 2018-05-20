@@ -120,6 +120,20 @@ describe("Dom rendering", () => {
     expect(element.querySelector("#test2")).toExist();
   });
 
+  it("should not call event hooks from underlying render calls", () => {
+    const removeListener = expect.createSpy();
+    render(
+      element,
+      <div
+        class="host"
+        oncreate={element => render(element, <div class="child" onremove={removeListener} />)}
+        onremove={element => render(element, null)}
+      />
+    );
+    render(element, null);
+    expect(removeListener.calls.length).toBe(1);
+  });
+
   it("should set the right inline styles", () => {
     render(element, <div style="padding: 10px" />);
     expect(element.querySelector("div")!.style.padding).toBe("10px");
